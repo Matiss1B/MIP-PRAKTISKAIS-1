@@ -250,14 +250,19 @@ class RetroGameGUI:
         self.lbl_datora_punkti = tk.Label(arena_frame, text="DATORS: 100", font=self.font_title, bg=self.bg_color, fg="yellow")
         self.lbl_datora_punkti.grid(row=0, column=2, padx=50)
 
+        # LABOJUMS: Pareiza ceļu veidošana Windows sistēmai
+        baze = os.path.dirname(__file__)
+        human = os.path.join(baze, "Gifs", "human.gif")
+        robot = os.path.join(baze, "Gifs", "robot.gif")
+
         try:
-            self.human_gif = AnimatedGif(arena_frame, "human.gif", shrink=2, bg=self.bg_color, highlightthickness=4, highlightbackground=self.bg_color)
+            self.human_gif = AnimatedGif(arena_frame, human, shrink=2, bg=self.bg_color, highlightthickness=4, highlightbackground=self.bg_color)
             self.human_gif.grid(row=1, column=0, pady=20)
         except Exception:
             tk.Label(arena_frame, text="[Nav human.gif]", font=self.font_normal, bg=self.bg_color, fg="red").grid(row=1, column=0, pady=20)
 
         try:
-            self.robot_gif = AnimatedGif(arena_frame, "robot.gif", shrink=2, bg=self.bg_color, highlightthickness=4, highlightbackground=self.bg_color)
+            self.robot_gif = AnimatedGif(arena_frame, robot, shrink=2, bg=self.bg_color, highlightthickness=4, highlightbackground=self.bg_color)
             self.robot_gif.grid(row=1, column=2, pady=20)
         except Exception:
             tk.Label(arena_frame, text="[Nav robot.gif]", font=self.font_normal, bg=self.bg_color, fg="red").grid(row=1, column=2, pady=20)
@@ -298,6 +303,13 @@ class RetroGameGUI:
     # =========================================================
     # GUI ATJAUNOŠANAS METODES (Tiek izsauktas no main.py)
     # =========================================================
+    
+    # JAUNUMS: Funkcija pogu atspējošanai / iespējošanai
+    def set_buttons_state(self, state):
+        """Iestata visu ciparu pogu stāvokli ('normal' vai 'disabled')"""
+        for btn in self.pogas.values():
+            btn.config(state=state)
+
     def update_scores(self, cilveks, dators):
         """Atjauno rezultātu text label ekrānā."""
         self.lbl_cilveka_punkti.config(text=f"CILVĒKS: {cilveks}")
