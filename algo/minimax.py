@@ -250,3 +250,29 @@ def evaluate(state):
     return state.human_points - state.computer_points
 
 
+
+
+start = GameState(sequence=[2, 1, 3], human_points=100, computer_points=100, current_player="Dators")
+
+root = TreeNode(start)
+count = build_tree(root, depth=2)
+
+print(start)
+print(root.state)
+print(f"children: {root.children}")
+print("-"*30)
+
+for c in root.children:
+    m_i = c.move_index
+    value = start.sequence[m_i]
+    print(f"move: {value} - {m_i}")
+    print(f"state: {c.state}")
+    print(f"hier.: {evaluate(c.state)}")
+
+    for c_n in c.children:
+        c_n_i = c_n.move_index
+        c_n_value = c.state.sequence[c_n_i]
+        print(f"  move: {c_n_value} - {c_n_i}")
+        print(f"  state: {c_n.state}")
+        print(f"  hier.: {evaluate(c_n.state)}")
+
