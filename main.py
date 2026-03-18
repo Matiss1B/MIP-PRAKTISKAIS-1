@@ -1,6 +1,8 @@
 import tkinter as tk
 import random
-from gui import GameGUI 
+from gui import GameGUI
+from tree import GameState, TreeNode, build_tree
+from algo.minimax import minimax 
 
 # Spēles loģikas un kontroles klase
 class GameEngine:
@@ -91,9 +93,30 @@ class GameEngine:
         
         pieejamie_indeksi = [i for i, x in enumerate(self.virkne) if x is not None]
         
-        if pieejamie_indeksi:
-            izveletais_indekss = random.choice(pieejamie_indeksi)
-            self.apstradat_gajienu(izveletais_indekss)
+        if not pieejamie_indeksi:
+            return
+        
+        # izveido pašreizējo spēles stāvokli
+        current_state = GameState(
+            sequence=self.virkne,
+            human_points=self.cilveka_punkti,
+            computer_points=self.datora_punkti,
+            current_player="Dators"
+        )
+        
+        # izveido koka sakni un ģenerē koku
+        root_node = TreeNode(current_state)
+        tree_depth = min(6, len(pieejamie_indeksi))  # Ierobežo dziļumu
+        build_tree(root_node, tree_depth)
+        
+        # izmanto minimax, lai atrastu labāko gājienu
+        _, best_move, _ = minimax(root_node, tree_depth)
+        
+        # ja minimax neatrada gājienu, izvēlas nejaušu
+        if best_move is None:
+            best_move = random.choice(pieejamie_indeksi)
+        
+        self.apstradat_gajienu(best_move)
 
     # Nosaka un paziņo uzvarētāju
     def pazinot_uzvaretaju(self):

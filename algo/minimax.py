@@ -1,11 +1,18 @@
-import os
-import sys
-
-sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from hier_func import evaluate
 
 
+def r_print(node, ident=0):
+    # print(f"{' ' * ident}Mezgls: {node.state} | Gājiens: {node.move_index}")
+    # for child in node.children:
+    #     ident += 2
+    #     r_print(child, ident)
+    pass
+
+
 def minimax(node, depth):
+    # print("evaluating:")
+    r_print(node)
+
     if depth == 0 or node.state.is_game_over() or len(node.children) == 0:
         score = evaluate(node.state)
         return score, node.move_index, 1
