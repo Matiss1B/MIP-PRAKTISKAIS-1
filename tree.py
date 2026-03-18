@@ -1,7 +1,7 @@
-#   1. GameState  — viens "stāvoklis" spēlē (kas notiek TIEŠI TAGAD)
-#   2. TreeNode   — viens "mezgls" kokā (satur stāvokli + bērnu mezglus)
-#   3. build_tree — funkcija, kas ģenerē koku līdz noteiktam dziļumam
-#   4. evaluate   — heiristiskā funkcija (novērtē, cik labs stāvoklis ir datoram)
+#   1. GameState  - viens "stāvoklis" spēlē (kas notiek TIEŠI TAGAD)
+#   2. TreeNode   - viens "mezgls" kokā (satur stāvokli + bērnu mezglus)
+#   3. build_tree - funkcija, kas ģenerē koku līdz noteiktam dziļumam
+#   4. evaluate   - heiristiskā funkcija (novērtē, cik labs stāvoklis ir datoram)
 
 
 # ------------------------------------------------------------
@@ -13,21 +13,21 @@
 #   - cik punktu ir cilvēkam
 #   - cik punktu ir datoram
 #   - kurš tagad gājienu veic
-# Tā ir GameState — viena "fotogrāfija" spēles brīdī.
+# Tā ir GameState - viena "fotogrāfija" spēles brīdī.
 # ------------------------------------------------------------
 
 
 class GameState:
-    """Viens spēles stāvoklis — 'fotogrāfija' no spēles brīža."""
+    """Viens spēles stāvoklis - 'fotogrāfija' no spēles brīža."""
 
     def __init__(self, sequence, human_points, computer_points, current_player):
         """
         Parametri:
-            sequence       — skaitļu virkne, piemēram (2, None, 1, 4)
+            sequence       - skaitļu virkne, piemēram (2, None, 1, 4)
                              None nozīmē, ka skaitlis jau ir paņemts
-            human_points   — cilvēka punkti (sākumā 100)
-            computer_points— datora punkti (sākumā 100)
-            current_player — kurš tagad spēlē: "Cilveks" vai "Dators"
+            human_points   - cilvēka punkti (sākumā 100)
+            computer_points- datora punkti (sākumā 100)
+            current_player - kurš tagad spēlē: "Cilveks" vai "Dators"
         """
         # Saglabājam virkni kā tuple (nevar mainīt nejauši)
         self.sequence = tuple(sequence)
@@ -59,16 +59,16 @@ class GameState:
         """
         for value in self.sequence:
             if value is not None:
-                return False  # Atradu skaitli — spēle turpinās
-        return True  # Neviena skaitļa nav — spēle beigusies
+                return False  # Atradu skaitli - spēle turpinās
+        return True  # Neviena skaitļa nav - spēle beigusies
 
     def make_move(self, index):
         """
         Izveido JAUNU stāvokli pēc gājiena (paņemot skaitli pozīcijā 'index').
-        Pašreizējo stāvokli NEMAINA — vienmēr atgriež jaunu.
+        Pašreizējo stāvokli NEMAINA - vienmēr atgriež jaunu.
 
         Parametri:
-            index — kuru skaitli paņemt (pozīcija virknē)
+            index - kuru skaitli paņemt (pozīcija virknē)
 
         Piemērs:
             Stāvoklis: sequence=(2, 1, 4), human=100, computer=100, player="Dators"
@@ -117,7 +117,7 @@ class GameState:
         return GameState(new_sequence, new_human, new_computer, next_player)
 
     def __repr__(self):
-        """Lai varētu izdrukāt stāvokli ar print() — ērti testēšanai."""
+        """Lai varētu izdrukāt stāvokli ar print() - ērti testēšanai."""
         nums = [str(x) if x is not None else "_" for x in self.sequence]
         return (
             f"Virkne: [{', '.join(nums)}] | "
@@ -153,8 +153,8 @@ class TreeNode:
     def __init__(self, state, move_index=None):
         """
         Parametri:
-            state      — GameState objekts (kas notiek šajā mezglā)
-            move_index — kurš gājiens noveda uz šo mezglu (None saknei)
+            state      - GameState objekts (kas notiek šajā mezglā)
+            move_index - kurš gājiens noveda uz šo mezglu (None saknei)
         """
         self.state = state  # Stāvoklis šajā mezglā
         self.move_index = move_index  # Kāds gājiens tika izdarīts, lai šeit nonāktu
@@ -178,8 +178,8 @@ def build_tree(node, depth):
     Rekursīvi ģenerē spēles koku, sākot no 'node', līdz dziļumam 'depth'.
 
     Parametri:
-        node  — TreeNode, no kura sākam ģenerēt
-        depth — cik līmeņus vēl ģenerēt (0 = neģenerē bērnus)
+        node  - TreeNode, no kura sākam ģenerēt
+        depth - cik līmeņus vēl ģenerēt (0 = neģenerē bērnus)
 
     Atgriež:
         Cik mezglu tika izveidoti (lai varētu ziņot statistiku eksperimentos).
