@@ -2,132 +2,135 @@ import random
 import time
 import tkinter as tk
 
-from game.alphabeta import alphabeta
-from game.minimax import minimax
+from game.alphabeta import AlphaBetaAlgo
+from game.minimax import MinMaxAlgo
 from gui.main_gui import GameGUI
-from game.tree import GameState, TreeNode, build_tree
+from game.tree import SpecificState, SpecificTreeNode, makeTree
 
 
 # Spēles loģikas un kontroles klase
-class GameEngine:
+class GameLogic:
     def __init__(self):
         # Izveido logu un piesaista GUI
         self.root = tk.Tk()
         self.gui = GameGUI(self.root)
 
         # Piesaista GUI pogas šī faila funkcijām
-        self.gui.on_start_game = self.sakt_jaunu_speli
-        self.gui.on_number_clicked = self.apstradat_gajienu
+        self.gui.on_start_game = self.StartTheGame
+        self.gui.on_number_clicked = self.MakeMoveGUI
 
         # Spēles mainīgie
-        self.cilveka_punkti = 100
-        self.datora_punkti = 100
-        self.virkne = []
-        self.aktivais_speletajs = None
-        self.iestatijumi = {}
-        self.spele_beigusies = False
+        self.human_points = 100
+        self.computer_points = 100
+        self.array_of_numbers = []
+        self.active_player = None
+        self.settings = {}
+        self.game_over = False
 
     # Sagatavo un sāk jaunu spēli
-    def sakt_jaunu_speli(self, iestatijumi):
-        self.iestatijumi = iestatijumi
-        self.cilveka_punkti = 100
-        self.datora_punkti = 100
-        self.spele_beigusies = False
-        self.aktivais_speletajs = iestatijumi["sacejs"]
+    def StartTheGame(self, settings):
+        self.settings = settings
+        self.human_points = 100
+        self.computer_points = 100
+        self.game_over = False
+        self.active_player = settings["sacejs"]
 
         # Ģenerē skaitļu masīvu
-        garums = iestatijumi["garums"]
-        self.virkne = [random.randint(1, 4) for _ in range(garums)]
+        lenght_of_array = settings["garums"]
+        self.array_of_numbers = [random.randint(1, 4) for _ in range(lenght_of_array)]
 
         self.gui.build_game_board(
-            self.virkne, self.aktivais_speletajs, iestatijumi["algoritms"], garums
+            self.array_of_numbers, self.active_player, settings["algoritms"], lenght_of_array
         )
 
         # Ja datori sāk pirmais, iedarbina tā gājienu
-        if self.aktivais_speletajs == "Dators":
-            self.sakt_datora_gajienu()
+        if self.active_player == "Dators":
+            self.startPCTurn()
 
     # Apstrādā klikšķi (spēlētāja vai datora)
-    def apstradat_gajienu(self, index):
-        if self.spele_beigusies or self.virkne[index] is None:
+    def MakeMoveGUI(self, index):
+        if self.game_over or self.array_of_numbers[index] is None:
             return
 
-        skaitlis = self.virkne[index]
+        number = self.array_of_numbers[index]
 
         # Punktu aprēķins
-        if skaitlis % 2 == 0:
-            atnem = skaitlis * 2
-            if self.aktivais_speletajs == "Cilveks":
-                self.cilveka_punkti -= atnem
+        if number % 2 == 0:
+            points = number * 2
+            if self.active_player == "Cilveks":
+                self.human_points -= points
             else:
-                self.datora_punkti -= atnem
+                self.computer_points -= points
         else:
-            if self.aktivais_speletajs == "Cilveks":
-                self.datora_punkti += skaitlis
+            if self.active_player == "Cilveks":
+                self.computer_points += number
             else:
-                self.cilveka_punkti += skaitlis
+                self.human_points += number
 
         # Atjauno GUI stāvokli
-        self.virkne[index] = None
-        self.gui.update_scores(self.cilveka_punkti, self.datora_punkti)
+        self.array_of_numbers[index] = None
+        self.gui.update_scores(self.human_points, self.computer_points)
         self.gui.remove_button(index)
 
         # Pārbauda, vai spēle beigusies
-        if all(x is None for x in self.virkne):
-            self.spele_beigusies = True
-            self.pazinot_uzvaretaju()
+        if all(x is None for x in self.array_of_numbers):
+            self.game_over = True
+            self.chooseWinner()
             return
 
         # Maina aktīvo spēlētāju
-        self.aktivais_speletajs = (
-            "Dators" if self.aktivais_speletajs == "Cilveks" else "Cilveks"
+        self.active_player = (
+            "Dators" if self.active_player == "Cilveks" else "Cilveks"
         )
-        self.gui.update_turn_indicator(self.aktivais_speletajs)
+        self.gui.update_turn_indicator(self.active_player)
 
         # Izsauc datora gājienu, ja nepieciešams
-        if self.aktivais_speletajs == "Dators":
-            self.sakt_datora_gajienu()
+        if self.active_player == "Dators":
+            self.startPCTurn()
 
     # Nobloķē pogas un ieplāno datora gājienu
-    def sakt_datora_gajienu(self):
+    def startPCTurn(self):
         self.gui.set_buttons_state("disabled")
-        self.root.after(800, self.veikt_datora_gajienu)
+        self.root.after(800, self.makeMovePC)
 
     # Datora loģika (Minimax vai Alpha-Beta algoritms)
-    def veikt_datora_gajienu(self):
-        if self.spele_beigusies:
+    def makeMovePC(self):
+        if self.game_over:
             return
 
-        pieejamie_indeksi = [i for i, x in enumerate(self.virkne) if x is not None]
+        available_indx = [i for i, x in enumerate(self.array_of_numbers) if x is not None]
 
-        if not pieejamie_indeksi:
+        if not available_indx:
             self.gui.set_buttons_state("normal")
             return
 
-        # izveido pašreizējo spēles stāvokli
-        current_state = GameState(
-            sequence=self.virkne,
-            human_points=self.cilveka_punkti,
-            computer_points=self.datora_punkti,
+        # Šeit izveido pašreizējo spēles stāvokli
+        current_state = SpecificState(
+            sequence=self.array_of_numbers,
+            human_points=self.human_points,
+            computer_points=self.computer_points,
             current_player="Dators",
         )
 
-        # izveido koka sakni un ģenerē koku
-        root_node = TreeNode(current_state)
-        tree_depth = min(4, len(pieejamie_indeksi))  # Ierobežo dziļumu
-        build_tree(root_node, tree_depth)
+        # Šeit izveido atbilstošo koka mezglu balstoties uz izveidoto stāvokli "current_state"
+        root_node = SpecificTreeNode(current_state)
+        # Šeit tiek ierobežots dzilums, un tiek izvēlets minimālais starp noklusēto 4
+        # vai ja pieejamie indeksi ir mazāk, tad izvēlas to
+        tree_depth = min(4, len(available_indx))
+        # Tiek padoti dati un saģenerēts nepilns koks
+        makeTree(root_node, tree_depth)
 
         start_time = time.perf_counter()
 
         # izmanto izvēlēto algoritmu, lai atrastu labāko gājienu
-        if self.iestatijumi["algoritms"] == "Alpha-Beta":
-            _, best_move, _ = alphabeta(root_node, -999999, 999999)
+        if self.settings["algoritms"] == "Alpha-Beta":
+            _, best_move, _ = AlphaBetaAlgo(root_node, -999999, 999999)
             end_time = time.perf_counter()
             elapsed_time_microseconds = (end_time - start_time) * 1_000_000
             print(f"{elapsed_time_microseconds:.2f}")
 
         else:
-            _, best_move, _ = minimax(root_node)
+            _, best_move, _ = MinMaxAlgo(root_node)
             end_time = time.perf_counter()
             elapsed_time_microseconds = (end_time - start_time) * 1_000_000
             print(f"{elapsed_time_microseconds:.2f}")
@@ -135,16 +138,16 @@ class GameEngine:
         # ja minimax neatrada gājienu, izvēlas nejaušu
         if best_move is None:
             print("DEBUG random choice made")
-            best_move = random.choice(pieejamie_indeksi)
+            best_move = random.choice(available_indx)
 
-        self.apstradat_gajienu(best_move)
+        self.MakeMoveGUI(best_move)
         self.gui.set_buttons_state("normal")
 
     # Nosaka un paziņo uzvarētāju
-    def pazinot_uzvaretaju(self):
-        if self.cilveka_punkti < self.datora_punkti:
+    def chooseWinner(self):
+        if self.human_points < self.computer_points:
             self.gui.show_winner("Cilvēkam UZVARA! Cilvēkam mazāk punktu!", "cyan")
-        elif self.datora_punkti < self.cilveka_punkti:
+        elif self.computer_points < self.human_points:
             self.gui.show_winner("Cilvēkam ZAUDĒJUMS! Datoram mazāk punktu!", "red")
         else:
             self.gui.show_winner("NEIZŠĶIRTS!", "yellow")
@@ -155,5 +158,5 @@ class GameEngine:
 
 
 if __name__ == "__main__":
-    speles_dzinis = GameEngine()
+    speles_dzinis = GameLogic()
     speles_dzinis.run()
