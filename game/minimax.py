@@ -1,7 +1,16 @@
-from hier_func import evaluate
+from datetime import datetime
+
+from game.hier_func import evaluate
 
 
-def alphabeta(node, alpha, beta):
+def r_print(node, ident=0):
+    print(f"{' ' * ident}Mezgls: {node.state} | Gājiens: {node.move_index}")
+    for child in node.children:
+        ident += 2
+        r_print(child, ident)
+
+
+def minimax(node):
     # Leaf node: no children (tree depth limit reached) or game is over
     if len(node.children) == 0 or node.state.is_game_over():
         score = evaluate(node.state)
@@ -9,48 +18,31 @@ def alphabeta(node, alpha, beta):
 
     total_evaluated = 0
 
-    # max - player (Dators)
+    # if 'min' or 'max' level:
     if node.state.current_player == "Dators":
         best_score = -999999
         best_move = None
 
         for child in node.children:
-            child_score, _, evaluated = alphabeta(child, alpha, beta)
+            child_score, _, evaluated = minimax(child)
             total_evaluated += evaluated
 
             if child_score > best_score:
                 best_score = child_score
                 best_move = child.move_index
 
-            # Update alpha
-            if best_score > alpha:
-                alpha = best_score
-
-            # Beta cutoff: minimizer would never allow this branch
-            if alpha >= beta:
-                break
-
         return best_score, best_move, total_evaluated
 
-    # min - cilveks
     else:
         best_score = 999999
         best_move = None
 
         for child in node.children:
-            child_score, _, evaluated = alphabeta(child, alpha, beta)
+            child_score, _, evaluated = minimax(child)
             total_evaluated += evaluated
 
             if child_score < best_score:
                 best_score = child_score
                 best_move = child.move_index
-
-            # Update beta
-            if best_score < beta:
-                beta = best_score
-
-            # Alpha cutoff: maximizer would never allow this branch
-            if alpha >= beta:
-                break
 
         return best_score, best_move, total_evaluated

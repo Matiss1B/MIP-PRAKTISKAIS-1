@@ -2,10 +2,10 @@ import random
 import time
 import tkinter as tk
 
-from algo.alphabeta import alphabeta
-from algo.minimax import minimax
-from gui import GameGUI
-from tree import GameState, TreeNode, build_tree
+from game.alphabeta import alphabeta
+from game.minimax import minimax
+from gui.main_gui import GameGUI
+from game.tree import GameState, TreeNode, build_tree
 
 
 # Spēles loģikas un kontroles klase
@@ -143,9 +143,9 @@ class GameEngine:
     # Nosaka un paziņo uzvarētāju
     def pazinot_uzvaretaju(self):
         if self.cilveka_punkti < self.datora_punkti:
-            self.gui.show_winner("UZVARA! Cilvēkam mazāk punktu!", "cyan")
+            self.gui.show_winner("Cilvēkam UZVARA! Cilvēkam mazāk punktu!", "cyan")
         elif self.datora_punkti < self.cilveka_punkti:
-            self.gui.show_winner("ZAAUDĒJUMS! Datoram mazāk punktu!", "red")
+            self.gui.show_winner("Cilvēkam ZAUDĒJUMS! Datoram mazāk punktu!", "red")
         else:
             self.gui.show_winner("NEIZŠĶIRTS!", "yellow")
 

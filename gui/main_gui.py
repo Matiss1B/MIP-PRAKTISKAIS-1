@@ -5,7 +5,7 @@ import ctypes         # Windows specifikai
 import shutil         # Failu kopēšanai
 
 # Automātiska fonta ielāde (Windows, Mac, Linux)
-fonta_cels = os.path.join(os.path.dirname(__file__), "fonts", "VT323-Regular.ttf")
+fonta_cels = os.path.join(os.path.dirname(__file__), "assets/fonts", "VT323-Regular.ttf")
 
 if sys.platform == "win32":
     ctypes.windll.gdi32.AddFontResourceExW(fonta_cels, 0x10, 0)
@@ -201,8 +201,8 @@ class GameGUI:
 
         # Avataru ielāde
         baze = os.path.dirname(__file__)
-        human = os.path.join(baze, "Gifs", "human.gif")
-        robot = os.path.join(baze, "Gifs", "robot.gif")
+        human = os.path.join(baze, "assets/gifs", "human.gif")
+        robot = os.path.join(baze, "assets/gifs", "robot.gif")
 
         try:
             self.human_gif = AnimatedGif(arena_frame, human, shrink=2, bg=self.bg_color, highlightthickness=4, highlightbackground=self.bg_color)
